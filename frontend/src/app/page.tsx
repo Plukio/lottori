@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import clsx from "clsx";
 import type { LucideIcon } from "lucide-react";
 import {
@@ -10,6 +10,10 @@ import {
   Scan,
   Ticket as TicketIcon,
 } from "lucide-react";
+import Quagga, {
+  type QuaggaJSConfig,
+  type QuaggaJSResultObject,
+} from "quagga";
 import { useLiff } from "@/hooks/useLiff";
 import { useTickets } from "@/hooks/useTickets";
 import { useRewards } from "@/hooks/useRewards";
@@ -20,13 +24,21 @@ type TabKey = "scan" | "tickets" | "rewards";
 
 const tabs: { key: TabKey; label: string; icon: LucideIcon }[] = [
   { key: "scan", label: "Scan", icon: Scan },
-  { key: "tickets", label: "My Tickets", icon: TicketIcon },
+  { key: "tickets", label: "My Lottaries", icon: TicketIcon },
   { key: "rewards", label: "Rewards", icon: Gift },
 ];
+
+type ScanPayload = {
+  raw: string;
+  numbers: string;
+  serial: string;
+};
 
 export default function Home() {
   const [activeTab, setActiveTab] = useState<TabKey>("scan");
   const [isScanning, setIsScanning] = useState(false);
+  const [scanError, setScanError] = useState<string | null>(null);
+  const [scanResult, setScanResult] = useState<ScanPayload | null>(null);
   const [copyingId, setCopyingId] = useState<string | null>(null);
   const [toast, setToast] = useState<string | null>(null);
   const [apiError, setApiError] = useState<string | null>(null);
@@ -42,30 +54,45 @@ export default function Home() {
     return next;
   }, [groups]);
 
-  const handleScan = () => {
-    setIsScanning(true);
-
-    if (idToken) {
-      submitTicket(
-        {
-          drawDate: new Date().toISOString().slice(0, 10),
-          numbers: "123 456",
-          serial: `SIM-scan-${Date.now()}`,
-          meta: { source: "scan" },
-        },
-        idToken
-      )
-        .then(() => {
-          setToast("Ticket synced to cloud");
-          setTimeout(() => setToast(null), 2000);
-        })
-        .catch((submitError) => {
-          console.error(submitError);
-          setApiError("Could not sync ticket. Please try again.");
-        });
+  const handleScanStart = () => {
+    if (!idToken) {
+      setApiError("Please login with LINE first.");
+      return;
     }
+    setScanError(null);
+    setIsScanning(true);
+  };
 
-    setTimeout(() => setIsScanning(false), 2400);
+  const handleScanStop = () => {
+    setIsScanning(false);
+  };
+
+  const handleScannerDetected = (rawText: string) => {
+    setIsScanning(false);
+    const parsed = parseTicketData(rawText);
+    setScanResult(parsed);
+  };
+
+  const handleConfirmTicket = () => {
+    if (!scanResult || !idToken) return;
+    submitTicket(
+      {
+        drawDate: new Date().toISOString().slice(0, 10),
+        numbers: scanResult.numbers,
+        serial: scanResult.serial,
+        meta: { raw: scanResult.raw },
+      },
+      idToken
+    )
+      .then(() => {
+        setToast("Ticket synced to cloud");
+        setScanResult(null);
+        setTimeout(() => setToast(null), 2000);
+      })
+      .catch((submitError) => {
+        console.error(submitError);
+        setApiError("Could not sync ticket. Please try again.");
+      });
   };
 
   const handleCopy = async (reward: Reward) => {
@@ -92,7 +119,7 @@ export default function Home() {
             <p className="text-sm uppercase tracking-[0.2em] text-forest/70 font-thai">
               รางวัลปรอบใจ คนไม่ถูกหวย
             </p>
-            <h1 className="text-2xl font-semibold">Lotteri</h1>
+            <h1 className="text-2xl font-semibold">Lottori</h1>
           </div>
           {isLoggedIn ? (
             <div className="flex flex-col items-end text-right">
@@ -126,8 +153,12 @@ export default function Home() {
         {activeTab === "scan" && (
           <ScanSection
             isScanning={isScanning}
-            onScan={handleScan}
+            onScan={handleScanStart}
+            onStop={handleScanStop}
             isApiReady={Boolean(idToken)}
+            error={scanError}
+            onDetected={handleScannerDetected}
+            onScannerError={setScanError}
           />
         )}
         {activeTab === "tickets" && (
@@ -156,6 +187,13 @@ export default function Home() {
           {error ?? apiError}
         </div>
       )}
+      {scanResult && (
+        <ScanResultModal
+          data={scanResult}
+          onConfirm={handleConfirmTicket}
+          onDismiss={() => setScanResult(null)}
+        />
+      )}
     </div>
   );
 }
@@ -163,11 +201,19 @@ export default function Home() {
 function ScanSection({
   isScanning,
   onScan,
+  onStop,
   isApiReady,
+  error,
+  onDetected,
+  onScannerError,
 }: {
   isScanning: boolean;
   onScan: () => void;
+  onStop: () => void;
   isApiReady: boolean;
+  error: string | null;
+  onDetected: (payload: string) => void;
+  onScannerError: (message: string | null) => void;
 }) {
   return (
     <section className="glass-card space-y-6 p-6">
@@ -185,16 +231,13 @@ function ScanSection({
           <Scan className="h-6 w-6" />
         </div>
       </div>
-      <div className="relative flex aspect-[4/3] w-full items-center justify-center rounded-3xl border border-dashed border-shamrock/40 bg-mist">
+      <div className="relative flex aspect-[4/3] w-full items-center justify-center overflow-hidden rounded-3xl border border-dashed border-shamrock/40 bg-mist">
         {isScanning ? (
-          <div className="flex flex-col items-center gap-3 text-center">
-            <Loader2 className="h-10 w-10 animate-spin text-shamrock" />
-            <p className="text-base font-medium">Processing ticket…</p>
-            <p className="text-sm text-forest/70">
-              Validating QR & parsing draw info
-            </p>
-            <div className="loading-bar w-32" />
-          </div>
+          <ScannerViewport
+            active={isScanning}
+            onDetected={onDetected}
+            onError={onScannerError}
+          />
         ) : (
           <div className="flex flex-col items-center gap-3 text-forest/80">
             <Camera className="h-12 w-12" />
@@ -207,19 +250,16 @@ function ScanSection({
       <div className="space-y-3">
         <button
           type="button"
-          onClick={onScan}
-          disabled={isScanning}
+          onClick={isScanning ? onStop : onScan}
           className={clsx(
             "flex w-full items-center justify-center gap-2 rounded-full border border-shamrock px-6 py-3 text-base font-semibold text-forest shadow-card transition",
-            isScanning
-              ? "bg-mint cursor-wait"
-              : "bg-mint hover:bg-mint/80"
+            isScanning ? "bg-white hover:bg-clay" : "bg-mint hover:bg-mint/80"
           )}
         >
           {isScanning ? (
             <>
               <Loader2 className="h-5 w-5 animate-spin" />
-              Scanning…
+              Stop scanning
             </>
           ) : (
             <>
@@ -228,6 +268,11 @@ function ScanSection({
             </>
           )}
         </button>
+        {error && (
+          <p className="text-xs text-red-500">
+            {error}
+          </p>
+        )}
       </div>
     </section>
   );
@@ -435,4 +480,151 @@ function FullScreenLoader({ message }: { message: string }) {
       <div className="w-40 loading-bar" />
     </div>
   );
+}
+
+function ScannerViewport({
+  active,
+  onDetected,
+  onError,
+}: {
+  active: boolean;
+  onDetected: (payload: string) => void;
+  onError?: (message: string | null) => void;
+}) {
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!active || !containerRef.current) {
+      Quagga.stop();
+      return;
+    }
+
+    const config: QuaggaJSConfig = {
+      inputStream: {
+        type: "LiveStream",
+        target: containerRef.current,
+        constraints: {
+          facingMode: "environment",
+          width: { ideal: 1280 },
+          height: { ideal: 720 },
+        },
+      },
+      decoder: {
+        readers: [
+          "code_128_reader",
+          "code_39_reader",
+          "ean_reader",
+          "ean_8_reader",
+          "upc_reader",
+          "upc_e_reader",
+          "qr_reader",
+        ],
+      },
+      locate: true,
+    };
+
+    let cancelled = false;
+
+    Quagga.init(config, (err) => {
+      if (err) {
+        console.error(err);
+        onError?.("Camera unavailable. Please allow camera access.");
+        return;
+      }
+      if (!cancelled) {
+        Quagga.start();
+      }
+    });
+
+    const handleDetect = (result: QuaggaJSResultObject) => {
+      const code = result.codeResult?.code;
+      if (code) {
+        onDetected(code);
+        Quagga.stop();
+      }
+    };
+
+    Quagga.onDetected(handleDetect);
+
+    return () => {
+      cancelled = true;
+      Quagga.offDetected(handleDetect);
+      Quagga.stop();
+    };
+  }, [active, onDetected, onError]);
+
+  if (!active) {
+    return null;
+  }
+
+  return <div ref={containerRef} className="h-full w-full bg-black" />;
+}
+
+function ScanResultModal({
+  data,
+  onConfirm,
+  onDismiss,
+}: {
+  data: ScanPayload;
+  onConfirm: () => void;
+  onDismiss: () => void;
+}) {
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 px-4">
+      <div className="w-full max-w-sm space-y-4 rounded-3xl bg-white p-6 shadow-card">
+        <div className="space-y-1">
+          <p className="text-sm uppercase tracking-[0.3em] text-forest/60">
+            Scan preview
+          </p>
+          <h3 className="text-2xl font-semibold font-thai">ตรวจผลสแกน</h3>
+        </div>
+        <div className="rounded-2xl border border-forest/10 bg-mint/30 px-4 py-3">
+          <p className="text-xs text-forest/60">Raw payload</p>
+          <p className="break-all text-sm font-mono">{data.raw}</p>
+        </div>
+        <div className="grid grid-cols-2 gap-3 text-left">
+          <div className="rounded-2xl border border-forest/10 bg-white px-3 py-2">
+            <p className="text-xs text-forest/60">Ticket numbers</p>
+            <p className="text-lg font-semibold">{data.numbers}</p>
+          </div>
+          <div className="rounded-2xl border border-forest/10 bg-white px-3 py-2">
+            <p className="text-xs text-forest/60">Serial</p>
+            <p className="text-lg font-semibold">{data.serial}</p>
+          </div>
+        </div>
+        <div className="flex gap-2 pt-2">
+          <button
+            type="button"
+            onClick={onDismiss}
+            className="flex-1 rounded-full border border-forest/20 px-4 py-2 text-sm font-semibold text-forest hover:bg-clay"
+          >
+            Scan again
+          </button>
+          <button
+            type="button"
+            onClick={onConfirm}
+            className="flex-1 rounded-full bg-shamrock px-4 py-2 text-sm font-semibold text-white hover:bg-shamrockDark"
+          >
+            Save ticket
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function parseTicketData(rawText: string): ScanPayload {
+  const digitsOnly = rawText.replace(/\D+/g, "");
+  const numbers =
+    digitsOnly.length >= 6
+      ? digitsOnly.slice(-6)
+      : rawText.replace(/\s+/g, "").slice(0, 6) || "------";
+  const serial =
+    digitsOnly.length >= 10 ? digitsOnly : `SCAN-${digitsOnly || Date.now()}`;
+
+  return {
+    raw: rawText,
+    numbers,
+    serial,
+  };
 }
