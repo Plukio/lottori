@@ -54,12 +54,31 @@ export default function Home() {
     return next;
   }, [groups]);
 
-  const handleScanStart = () => {
+  const handleScanStart = async () => {
     if (!idToken) {
       setApiError("Please login with LINE first.");
       return;
     }
     setScanError(null);
+
+    const w = window as typeof window & {
+      liff?: { scanCodeV2?: () => Promise<{ value?: string }> };
+    };
+    if (typeof window !== "undefined" && typeof w.liff?.scanCodeV2 === "function") {
+      try {
+        const result = await w.liff.scanCodeV2!();
+        if (result?.value) {
+          handleScannerDetected(result.value);
+        } else {
+          setScanError("No data detected. Please try again.");
+        }
+      } catch (err) {
+        console.error(err);
+        setScanError("Unable to access scanner.");
+      }
+      return;
+    }
+
     setIsScanning(true);
   };
 
@@ -515,8 +534,6 @@ function ScannerViewport({
           "code_39_reader",
           "ean_reader",
           "ean_8_reader",
-          "upc_reader",
-          "upc_e_reader",
           "qr_reader",
         ],
       },
