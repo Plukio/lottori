@@ -2,14 +2,7 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import clsx from "clsx";
-import type { LucideIcon } from "lucide-react";
-import {
-  Camera,
-  Gift,
-  Loader2,
-  Scan,
-  Ticket as TicketIcon,
-} from "lucide-react";
+import { Loader2 } from "lucide-react";
 import Quagga, {
   type QuaggaJSConfig,
   type QuaggaJSResultObject,
@@ -20,14 +13,6 @@ import { useRewards } from "@/hooks/useRewards";
 import type { Reward, TicketGroup } from "@/types";
 import { submitTicket } from "@/lib/apiClient";
 
-type TabKey = "scan" | "tickets" | "rewards";
-
-const tabs: { key: TabKey; label: string; icon: LucideIcon }[] = [
-  { key: "scan", label: "Scan", icon: Scan },
-  { key: "tickets", label: "My Lottaries", icon: TicketIcon },
-  { key: "rewards", label: "Rewards", icon: Gift },
-];
-
 type ScanPayload = {
   raw: string;
   numbers: string;
@@ -35,7 +20,6 @@ type ScanPayload = {
 };
 
 export default function Home() {
-  const [activeTab, setActiveTab] = useState<TabKey>("scan");
   const [isScanning, setIsScanning] = useState(false);
   const [scanError, setScanError] = useState<string | null>(null);
   const [scanResult, setScanResult] = useState<ScanPayload | null>(null);
@@ -140,22 +124,24 @@ export default function Home() {
             </p>
             <h1 className="text-2xl font-semibold">Lottori</h1>
           </div>
-          {isLoggedIn ? (
-            <div className="flex flex-col items-end text-right">
-              <p className="text-sm text-forest/70">account:</p>
-              <p className="text-base font-semibold">
-                {profile?.displayName ?? "Demo User"}
-              </p>
-            </div>
-          ) : (
-            <button
-              type="button"
-              onClick={login}
-              className="rounded-full bg-mint px-4 py-2 text-sm font-semibold text-forest shadow-card transition hover:bg-mint/80"
-            >
-              Login with LINE
-            </button>
-          )}
+          <div className="flex flex-col items-end">
+            {isLoggedIn ? (
+              <>
+                <p className="text-sm text-forest/70">account:</p>
+                <p className="text-base font-semibold">
+                  {profile?.displayName ?? "Demo User"}
+                </p>
+              </>
+            ) : (
+              <button
+                type="button"
+                onClick={login}
+                className="rounded-full bg-mint px-4 py-2 text-sm font-semibold text-forest shadow-card transition hover:bg-mint/80"
+              >
+                Login with LINE
+              </button>
+            )}
+          </div>
         </div>
         <div className="rounded-4xl border border-forest/10 bg-white px-6 py-4 text-forest shadow-card">
           <p className="text-sm uppercase tracking-[0.3em] text-forest/70">
@@ -168,32 +154,25 @@ export default function Home() {
         </div>
       </header>
 
-      <main className="flex-1 space-y-4 pb-24">
-        {activeTab === "scan" && (
-          <ScanSection
-            isScanning={isScanning}
-            onScan={handleScanStart}
-            onStop={handleScanStop}
-            isApiReady={Boolean(idToken)}
-            error={scanError}
-            onDetected={handleScannerDetected}
-            onScannerError={setScanError}
-          />
-        )}
-        {activeTab === "tickets" && (
-          <TicketsSection groups={groups} loading={ticketsLoading} />
-        )}
-        {activeTab === "rewards" && (
-          <RewardsSection
-            rewards={rewards}
-            loading={rewardsLoading}
-            copyingId={copyingId}
-            onCopy={handleCopy}
-          />
-        )}
-      </main>
+      {scanError && (
+        <div className="rounded-2xl border border-red-200 bg-white px-4 py-3 text-sm text-red-600 shadow-card">
+          {scanError}
+        </div>
+      )}
 
-      <TabBar active={activeTab} onChange={setActiveTab} />
+      <main className="space-y-4 pb-16">
+        <TicketsSection
+          groups={groups}
+          loading={ticketsLoading}
+          onScan={handleScanStart}
+        />
+        <RewardsSection
+          rewards={rewards}
+          loading={rewardsLoading}
+          copyingId={copyingId}
+          onCopy={handleCopy}
+        />
+      </main>
 
       {!isReady && <FullScreenLoader message="Logging you in..." />}
       {toast && (
@@ -213,97 +192,36 @@ export default function Home() {
           onDismiss={() => setScanResult(null)}
         />
       )}
+      {isScanning && (
+        <ScannerViewport
+          active={isScanning}
+          onDetected={handleScannerDetected}
+          onError={setScanError}
+          onStop={handleScanStop}
+        />
+      )}
     </div>
-  );
-}
-
-function ScanSection({
-  isScanning,
-  onScan,
-  onStop,
-  isApiReady,
-  error,
-  onDetected,
-  onScannerError,
-}: {
-  isScanning: boolean;
-  onScan: () => void;
-  onStop: () => void;
-  isApiReady: boolean;
-  error: string | null;
-  onDetected: (payload: string) => void;
-  onScannerError: (message: string | null) => void;
-}) {
-  return (
-    <section className="glass-card space-y-6 p-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <p className="text-sm text-forest/70">Scan Lottery Ticket</p>
-          <h2 className="text-xl font-semibold">Align the QR to capture</h2>
-          {!isApiReady && (
-            <p className="text-xs text-forest/60">
-              Login with LINE to sync tickets to the cloud.
-            </p>
-          )}
-        </div>
-        <div className="rounded-full bg-mint p-3 text-shamrock">
-          <Scan className="h-6 w-6" />
-        </div>
-      </div>
-      <div className="relative flex aspect-[4/3] w-full items-center justify-center overflow-hidden rounded-3xl border border-dashed border-shamrock/40 bg-mist">
-        {isScanning ? (
-          <ScannerViewport
-            active={isScanning}
-            onDetected={onDetected}
-            onError={onScannerError}
-          />
-        ) : (
-          <div className="flex flex-col items-center gap-3 text-forest/80">
-            <Camera className="h-12 w-12" />
-            <p className="text-sm font-medium">
-              Align QR code in the frame to scan
-            </p>
-          </div>
-        )}
-      </div>
-      <div className="space-y-3">
-        <button
-          type="button"
-          onClick={isScanning ? onStop : onScan}
-          className={clsx(
-            "flex w-full items-center justify-center gap-2 rounded-full border border-shamrock px-6 py-3 text-base font-semibold text-forest shadow-card transition",
-            isScanning ? "bg-white hover:bg-clay" : "bg-mint hover:bg-mint/80"
-          )}
-        >
-          {isScanning ? (
-            <>
-              <Loader2 className="h-5 w-5 animate-spin" />
-              Stop scanning
-            </>
-          ) : (
-            <>
-              <Scan className="h-5 w-5" />
-              Scan Now
-            </>
-          )}
-        </button>
-        {error && (
-          <p className="text-xs text-red-500">
-            {error}
-          </p>
-        )}
-      </div>
-    </section>
   );
 }
 
 function TicketsSection({
   groups,
   loading,
+  onScan,
 }: {
   groups: TicketGroup[];
   loading: boolean;
+  onScan: () => void;
 }) {
+  const [activeDraw, setActiveDraw] = useState<string | null>(null);
+  const safeActiveDraw = useMemo(() => {
+    if (!groups.length) return null;
+    if (activeDraw && groups.some((group) => group.drawDate === activeDraw)) {
+      return activeDraw;
+    }
+    return groups[0].drawDate;
+  }, [groups, activeDraw]);
+
   if (loading) {
     return (
       <section className="space-y-3">
@@ -320,45 +238,91 @@ function TicketsSection({
     );
   }
 
-  return (
-    <section className="space-y-4">
-      {groups.map((group) => (
-        <article
-          key={group.drawDate}
-          className="rounded-4xl bg-white p-5 shadow-card"
+  if (!groups.length) {
+    return (
+      <section className="rounded-4xl bg-white p-6 text-center shadow-card">
+        <p className="text-lg font-semibold">ยังไม่มีลอตเตอรี่ในระบบ</p>
+        <p className="text-sm text-forest/60">
+          สแกนตั๋วใบแรกของคุณเพื่อดูผลและรับรางวัลปลอบใจ
+        </p>
+        <button
+          type="button"
+          onClick={onScan}
+          className="mt-4 inline-flex items-center justify-center rounded-full bg-shamrock px-5 py-2 text-sm font-semibold text-white hover:bg-shamrockDark"
         >
-          <div className="flex items-center justify-between">
+          สแกนลอตเตอรี่
+        </button>
+      </section>
+    );
+  }
+
+  const activeGroup =
+    groups.find((group) => group.drawDate === safeActiveDraw) ?? groups[0];
+
+  return (
+    <section className="space-y-4 rounded-4xl bg-white p-5 shadow-card">
+      <div className="flex items-center justify-between">
+        <h2 className="text-xl font-semibold">My Tickets</h2>
+        <button
+          type="button"
+          onClick={onScan}
+          className="rounded-full border border-forest/15 px-4 py-2 text-sm font-semibold text-forest hover:border-forest/30"
+        >
+          สแกนเพิ่ม
+        </button>
+      </div>
+      <div className="flex gap-2 overflow-x-auto pb-2 no-scrollbar">
+        {groups.map((group) => (
+          <button
+            key={group.drawDate}
+            type="button"
+            onClick={() => setActiveDraw(group.drawDate)}
+            className={clsx(
+              "rounded-full px-4 py-2 text-sm font-semibold transition",
+              group.drawDate === safeActiveDraw
+                ? "bg-shamrock text-white"
+                : "bg-clay text-forest"
+            )}
+          >
+            {formatDrawDate(group.drawDate)}
+          </button>
+        ))}
+      </div>
+      <div className="space-y-3">
+        <div className="flex items-center justify-between">
+          <div>
+            <p className="text-sm text-forest/70">Draw date</p>
+            <h3 className="text-lg font-semibold">
+              {formatDrawDate(activeGroup.drawDate)}
+            </h3>
+          </div>
+          <span className="rounded-full bg-mint px-3 py-1 text-xs font-semibold text-shamrock">
+            {activeGroup.tickets.length} tickets
+          </span>
+        </div>
+        {activeGroup.headline && (
+          <div className="rounded-2xl bg-mint px-4 py-3 text-sm font-semibold text-shamrock">
+            {activeGroup.headline} All your tickets this draw were non-winners.
+          </div>
+        )}
+        {activeGroup.tickets.map((ticket) => (
+          <div
+            key={ticket.id}
+            className="flex items-center justify-between rounded-3xl border border-forest/10 px-4 py-3"
+          >
             <div>
-              <p className="text-sm text-forest/70">Draw date</p>
-              <h3 className="text-lg font-semibold">{group.drawDate}</h3>
+              <p className="text-xs uppercase tracking-[0.3em] text-forest/60">
+                Ticket number
+              </p>
+              <p className="text-base font-semibold">{ticket.numbers}</p>
+              <p className="text-xs uppercase tracking-[0.3em] text-forest/60">
+                Serial {ticket.serial}
+              </p>
             </div>
-            <span className="rounded-full bg-mint px-3 py-1 text-xs font-semibold text-shamrock">
-              {group.tickets.length} tickets
-            </span>
+            <StatusBadge status={ticket.status} />
           </div>
-          {group.headline && (
-            <div className="mt-3 rounded-2xl bg-mint px-4 py-3 text-sm font-semibold text-shamrock">
-              {group.headline} All your tickets this draw were non-winners.
-            </div>
-          )}
-          <div className="mt-4 space-y-3">
-            {group.tickets.map((ticket) => (
-              <div
-                key={ticket.id}
-                className="flex items-center justify-between rounded-3xl border border-forest/10 px-4 py-3"
-              >
-                <div>
-                  <p className="text-base font-semibold">{ticket.numbers}</p>
-                  <p className="text-xs uppercase tracking-[0.3em] text-forest/60">
-                    Serial {ticket.serial}
-                  </p>
-                </div>
-                <StatusBadge status={ticket.status} />
-              </div>
-            ))}
-          </div>
-        </article>
-      ))}
+        ))}
+      </div>
     </section>
   );
 }
@@ -462,33 +426,6 @@ function StatusBadge({ status }: { status: string }) {
   );
 }
 
-function TabBar({
-  active,
-  onChange,
-}: {
-  active: TabKey;
-  onChange: (key: TabKey) => void;
-}) {
-  return (
-    <nav className="fixed bottom-5 left-1/2 z-20 flex w-[92vw] max-w-md -translate-x-1/2 items-center justify-between rounded-full border border-white/60 bg-white/90 px-4 py-3 shadow-card backdrop-blur">
-      {tabs.map(({ key, label, icon: Icon }) => (
-        <button
-          key={key}
-          type="button"
-          onClick={() => onChange(key)}
-          className={clsx(
-            "flex flex-1 flex-col items-center gap-1 text-xs font-semibold transition",
-            active === key ? "text-shamrock" : "text-forest/50"
-          )}
-        >
-          <Icon className="h-5 w-5" />
-          {label}
-        </button>
-      ))}
-    </nav>
-  );
-}
-
 function FullScreenLoader({ message }: { message: string }) {
   return (
     <div className="fixed inset-0 z-40 flex flex-col items-center justify-center gap-4 bg-white/90 backdrop-blur">
@@ -505,10 +442,12 @@ function ScannerViewport({
   active,
   onDetected,
   onError,
+  onStop,
 }: {
   active: boolean;
   onDetected: (payload: string) => void;
   onError?: (message: string | null) => void;
+  onStop: () => void;
 }) {
   const containerRef = useRef<HTMLDivElement>(null);
 
@@ -574,7 +513,21 @@ function ScannerViewport({
     return null;
   }
 
-  return <div ref={containerRef} className="h-full w-full bg-black" />;
+  return (
+    <div className="fixed inset-0 z-40 flex flex-col items-center justify-center gap-4 bg-black/80 px-4 py-6">
+      <div
+        ref={containerRef}
+        className="aspect-[3/4] w-full max-w-md overflow-hidden rounded-3xl bg-black"
+      />
+      <button
+        type="button"
+        onClick={onStop}
+        className="w-full max-w-md rounded-full border border-white/40 px-4 py-2 text-sm font-semibold text-white transition hover:bg-white/10"
+      >
+        Cancel
+      </button>
+    </div>
+  );
 }
 
 function ScanResultModal({
@@ -628,6 +581,18 @@ function ScanResultModal({
       </div>
     </div>
   );
+}
+
+function formatDrawDate(drawDate: string) {
+  const date = new Date(drawDate);
+  if (!Number.isNaN(date.valueOf())) {
+    return date.toLocaleDateString("en-GB", {
+      day: "2-digit",
+      month: "long",
+      year: "numeric",
+    });
+  }
+  return drawDate;
 }
 
 function parseTicketData(rawText: string): ScanPayload {

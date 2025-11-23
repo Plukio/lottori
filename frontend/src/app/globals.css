@@ -24,6 +24,15 @@ body {
   font-family: var(--font-noto-thai), var(--font-geist-sans), system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
 }
 
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
 .glass-card {
   background: linear-gradient(180deg, rgba(255, 255, 255, 0.9) 0%, #ffffff 100%);
   box-shadow: 0 20px 60px rgba(21, 194, 124, 0.12);
