@@ -155,32 +155,6 @@ export default function Home() {
             Scan before midnight to lock rewards.
           </p>
         </div>
-        <div className="flex gap-2 rounded-full bg-clay/50 p-1">
-          <button
-            type="button"
-            onClick={() => setActiveView("tickets")}
-            className={clsx(
-              "flex-1 rounded-full px-4 py-2 text-sm font-semibold transition",
-              activeView === "tickets"
-                ? "bg-white text-forest shadow-card"
-                : "text-forest/60"
-            )}
-          >
-            My Tickets
-          </button>
-          <button
-            type="button"
-            onClick={() => setActiveView("rewards")}
-            className={clsx(
-              "flex-1 rounded-full px-4 py-2 text-sm font-semibold transition",
-              activeView === "rewards"
-                ? "bg-white text-forest shadow-card"
-                : "text-forest/60"
-            )}
-          >
-            Rewards Wallet
-          </button>
-        </div>
       </header>
 
       {scanError && activeView === "tickets" && (
@@ -232,6 +206,7 @@ export default function Home() {
           onStop={handleScanStop}
         />
       )}
+      <FloatingNav active={activeView} onChange={setActiveView} />
     </div>
   );
 }
@@ -467,6 +442,43 @@ function FullScreenLoader({ message }: { message: string }) {
       <p className="text-base font-semibold">{message}</p>
       <div className="w-40 loading-bar" />
     </div>
+  );
+}
+
+function FloatingNav({
+  active,
+  onChange,
+}: {
+  active: "tickets" | "rewards";
+  onChange: (view: "tickets" | "rewards") => void;
+}) {
+  return (
+    <nav className="fixed bottom-5 left-1/2 z-30 flex w-[90vw] max-w-md -translate-x-1/2 items-center gap-2 rounded-full border border-forest/10 bg-white/95 px-4 py-2 shadow-card backdrop-blur">
+      <button
+        type="button"
+        onClick={() => onChange("tickets")}
+        className={clsx(
+          "flex flex-1 items-center justify-center gap-2 rounded-full px-3 py-2 text-xs font-semibold transition",
+          active === "tickets"
+            ? "bg-shamrock text-white"
+            : "text-forest/60 hover:bg-clay/50"
+        )}
+      >
+        My Tickets
+      </button>
+      <button
+        type="button"
+        onClick={() => onChange("rewards")}
+        className={clsx(
+          "flex flex-1 items-center justify-center gap-2 rounded-full px-3 py-2 text-xs font-semibold transition",
+          active === "rewards"
+            ? "bg-shamrock text-white"
+            : "text-forest/60 hover:bg-clay/50"
+        )}
+      >
+        Rewards
+      </button>
+    </nav>
   );
 }
 
