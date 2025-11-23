@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import clsx from "clsx";
-import { Loader2, Ticket as TicketIcon, Gift } from "lucide-react";
+import { Loader2, Ticket as TicketIcon, Gift, Scan } from "lucide-react";
 import Quagga, {
   type QuaggaJSConfig,
   type QuaggaJSResultObject,
@@ -255,8 +255,9 @@ function TicketsSection({
         <button
           type="button"
           onClick={onScan}
-          className="mt-4 inline-flex items-center justify-center rounded-full bg-shamrock px-5 py-2 text-sm font-semibold text-white hover:bg-shamrockDark font-thai"
+          className="mt-4 inline-flex items-center justify-center gap-2 rounded-full bg-shamrock px-5 py-2 text-sm font-semibold text-white hover:bg-shamrockDark font-thai"
         >
+          <Scan className="h-4 w-4 text-white" />
           สแกนลอตเตอรี่
         </button>
       </section>
@@ -273,8 +274,9 @@ function TicketsSection({
         <button
           type="button"
           onClick={onScan}
-          className="rounded-full border border-forest/15 px-4 py-2 text-sm font-semibold text-forest hover:border-forest/30 font-thai"
+          className="inline-flex items-center gap-2 rounded-full border border-forest/15 px-4 py-2 text-sm font-semibold text-forest hover:border-forest/30 font-thai"
         >
+          <Scan className="h-4 w-4" />
           สแกนเพิ่ม
         </button>
       </div>
