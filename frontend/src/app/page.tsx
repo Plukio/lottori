@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import clsx from "clsx";
-import { Loader2 } from "lucide-react";
+import { Loader2, Ticket as TicketIcon, Gift } from "lucide-react";
 import Quagga, {
   type QuaggaJSConfig,
   type QuaggaJSResultObject,
@@ -453,7 +453,7 @@ function FloatingNav({
   onChange: (view: "tickets" | "rewards") => void;
 }) {
   return (
-    <nav className="fixed bottom-5 left-1/2 z-30 flex w-[90vw] max-w-md -translate-x-1/2 items-center gap-2 rounded-full border border-forest/10 bg-white/95 px-4 py-2 shadow-card backdrop-blur">
+    <nav className="fixed bottom-5 left-1/2 z-30 flex w-[90vw] max-w-md -translate-x-1/2 items-center gap-2 rounded-full border border-forest/10 bg-forest text-white px-4 py-2 shadow-card">
       <button
         type="button"
         onClick={() => onChange("tickets")}
@@ -461,9 +461,10 @@ function FloatingNav({
           "flex flex-1 items-center justify-center gap-2 rounded-full px-3 py-2 text-xs font-semibold transition",
           active === "tickets"
             ? "bg-shamrock text-white"
-            : "text-forest/60 hover:bg-clay/50"
+            : "text-white/70 hover:bg-white/10"
         )}
       >
+        <TicketIcon className="h-4 w-4" />
         My Tickets
       </button>
       <button
@@ -473,9 +474,10 @@ function FloatingNav({
           "flex flex-1 items-center justify-center gap-2 rounded-full px-3 py-2 text-xs font-semibold transition",
           active === "rewards"
             ? "bg-shamrock text-white"
-            : "text-forest/60 hover:bg-clay/50"
+            : "text-white/70 hover:bg-white/10"
         )}
       >
+        <Gift className="h-4 w-4" />
         Rewards
       </button>
     </nav>
