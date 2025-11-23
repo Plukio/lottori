@@ -1,0 +1,28 @@
+{
+  "name": "lottori",
+  "version": "0.1.0",
+  "description": "LINE LIFF mini-app that turns losing Thai lottery tickets into sponsor-funded rewards (Grab, Shopee, top-up, in-app coins). Users scan or upload tickets, the backend checks draw results, and a reward engine assigns vouchers from a managed inventory. Admin tools handle voucher uploads, monitoring, and manual actions.",
+  "private": true,
+  "packageManager": "npm@10.9.0",
+  "engines": {
+    "node": ">=18.18.0"
+  },
+  "workspaces": [
+    "frontend",
+    "functions",
+    "admin"
+  ],
+  "scripts": {
+    "dev:frontend": "npm run dev --workspace frontend",
+    "dev:functions": "npm run serve --workspace functions",
+    "lint": "echo \"define lint scripts inside workspaces\"",
+    "typecheck": "echo \"define typecheck scripts inside workspaces\""
+  },
+  "keywords": [
+    "liff",
+    "firebase",
+    "lottery",
+    "rewards"
+  ],
+  "license": "MIT"
+}

@@ -1,0 +1,28 @@
+# Node / workspace
+node_modules
+.npm
+.pnpm-store
+package-lock.json
+
+# Firebase
+.firebase/
+firebase-debug.log
+
+# Local env/config
+.env
+.env.local
+.env.development
+.env.production
+.env.test
+!.env.example
+.secret
+.runtimeconfig.json
+
+# Build artifacts
+frontend/.next
+frontend/out
+functions/lib
+admin/dist
+coverage
+.DS_Store
+

@@ -1,0 +1,16 @@
+{
+  "name": "Lucky Booster",
+  "short_name": "Lottori",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#f4f7f7",
+  "theme_color": "#15c27c",
+  "icons": [
+    {
+      "src": "/clover.svg",
+      "sizes": "192x192",
+      "type": "image/svg+xml"
+    }
+  ]
+}
+

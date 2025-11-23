@@ -1,0 +1,14 @@
+{
+  "projects": {
+    "default": "lottori-dev"
+  },
+  "targets": {
+    "lotteri-7a2c2": {
+      "hosting": {
+        "frontend": [
+          "lotteri-7a2c2"
+        ]
+      }
+    }
+  },
+  "etags": {}
