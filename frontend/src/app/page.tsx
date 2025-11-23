@@ -96,7 +96,7 @@ export default function Home() {
           </div>
           {isLoggedIn ? (
             <div className="flex flex-col items-end text-right">
-              <p className="text-sm text-forest/70">Logged in as</p>
+              <p className="text-sm text-forest/70">account:</p>
               <p className="text-base font-semibold">
                 {profile?.displayName ?? "Demo User"}
               </p>
