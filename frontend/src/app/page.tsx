@@ -453,24 +453,17 @@ function FloatingNav({
   onChange: (view: "tickets" | "rewards") => void;
 }) {
   return (
-    <nav className="fixed bottom-5 left-1/2 z-30 flex w-[90vw] max-w-md -translate-x-1/2 items-center gap-2 rounded-full border border-white/50 bg-white/80 px-4 py-2 text-forest shadow-card backdrop-blur">
+    <nav className="fixed bottom-5 left-1/2 z-30 flex w-[90vw] max-w-md -translate-x-1/2 items-center gap-2 rounded-full border border-black/10 bg-white/85 px-4 py-2 text-black shadow-card backdrop-blur">
       <button
         type="button"
         onClick={() => onChange("tickets")}
         className={clsx(
           "flex flex-1 items-center justify-center gap-2 rounded-full px-3 py-2 text-xs font-semibold transition",
-          active === "tickets"
-            ? "bg-shamrock text-white shadow-md"
-            : "text-forest/70 hover:bg-white/60"
+          active === "tickets" ? "text-black" : "text-black/60"
         )}
       >
-        <TicketIcon
-          className={clsx(
-            "h-5 w-5",
-            active === "tickets" ? "text-white" : "text-forest/60"
-          )}
-        />
-        <span className={clsx(active === "tickets" ? "font-semibold" : "")}>
+        <TicketIcon className="h-5 w-5" />
+        <span className={clsx(active === "tickets" ? "font-bold" : "font-semibold")}>
           My Tickets
         </span>
       </button>
@@ -479,18 +472,11 @@ function FloatingNav({
         onClick={() => onChange("rewards")}
         className={clsx(
           "flex flex-1 items-center justify-center gap-2 rounded-full px-3 py-2 text-xs font-semibold transition",
-          active === "rewards"
-            ? "bg-shamrock text-white shadow-md"
-            : "text-forest/70 hover:bg-white/60"
+          active === "rewards" ? "text-black" : "text-black/60"
         )}
       >
-        <Gift
-          className={clsx(
-            "h-5 w-5",
-            active === "rewards" ? "text-white" : "text-forest/60"
-          )}
-        />
-        <span className={clsx(active === "rewards" ? "font-semibold" : "")}>
+        <Gift className="h-5 w-5" />
+        <span className={clsx(active === "rewards" ? "font-bold" : "font-semibold")}>
           Rewards
         </span>
       </button>
@@ -656,7 +642,7 @@ function formatDrawDate(drawDate: string) {
 
 function formatDrawTabLabel(drawDate: string) {
   const date = new Date(drawDate);
-  if (!Number.isNaN(date.getTime())) {
+  if (!Number.isNaN(date.valueOf())) {
     return new Intl.DateTimeFormat("en-GB", {
       day: "numeric",
       month: "short",
