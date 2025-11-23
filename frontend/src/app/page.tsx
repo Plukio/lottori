@@ -26,6 +26,9 @@ export default function Home() {
   const [copyingId, setCopyingId] = useState<string | null>(null);
   const [toast, setToast] = useState<string | null>(null);
   const [apiError, setApiError] = useState<string | null>(null);
+  const [activeView, setActiveView] = useState<"tickets" | "rewards">(
+    "tickets"
+  );
 
   const { isReady, isLoggedIn, profile, idToken, login, error } = useLiff();
   const userId = profile?.userId ?? "demo-user";
@@ -152,26 +155,55 @@ export default function Home() {
             Scan before midnight to lock rewards.
           </p>
         </div>
+        <div className="flex gap-2 rounded-full bg-clay/50 p-1">
+          <button
+            type="button"
+            onClick={() => setActiveView("tickets")}
+            className={clsx(
+              "flex-1 rounded-full px-4 py-2 text-sm font-semibold transition",
+              activeView === "tickets"
+                ? "bg-white text-forest shadow-card"
+                : "text-forest/60"
+            )}
+          >
+            My Tickets
+          </button>
+          <button
+            type="button"
+            onClick={() => setActiveView("rewards")}
+            className={clsx(
+              "flex-1 rounded-full px-4 py-2 text-sm font-semibold transition",
+              activeView === "rewards"
+                ? "bg-white text-forest shadow-card"
+                : "text-forest/60"
+            )}
+          >
+            Rewards Wallet
+          </button>
+        </div>
       </header>
 
-      {scanError && (
+      {scanError && activeView === "tickets" && (
         <div className="rounded-2xl border border-red-200 bg-white px-4 py-3 text-sm text-red-600 shadow-card">
           {scanError}
         </div>
       )}
 
       <main className="space-y-4 pb-16">
-        <TicketsSection
-          groups={groups}
-          loading={ticketsLoading}
-          onScan={handleScanStart}
-        />
-        <RewardsSection
-          rewards={rewards}
-          loading={rewardsLoading}
-          copyingId={copyingId}
-          onCopy={handleCopy}
-        />
+        {activeView === "tickets" ? (
+          <TicketsSection
+            groups={groups}
+            loading={ticketsLoading}
+            onScan={handleScanStart}
+          />
+        ) : (
+          <RewardsSection
+            rewards={rewards}
+            loading={rewardsLoading}
+            copyingId={copyingId}
+            onCopy={handleCopy}
+          />
+        )}
       </main>
 
       {!isReady && <FullScreenLoader message="Logging you in..." />}
@@ -271,17 +303,17 @@ function TicketsSection({
           สแกนเพิ่ม
         </button>
       </div>
-      <div className="flex gap-2 overflow-x-auto pb-2 no-scrollbar">
+      <div className="flex gap-2 overflow-x-auto rounded-full bg-clay/50 p-2 no-scrollbar">
         {groups.map((group) => (
           <button
             key={group.drawDate}
             type="button"
             onClick={() => setActiveDraw(group.drawDate)}
             className={clsx(
-              "rounded-full px-4 py-2 text-sm font-semibold transition",
+              "rounded-full px-4 py-2 text-sm font-semibold transition shadow-sm",
               group.drawDate === safeActiveDraw
-                ? "bg-shamrock text-white"
-                : "bg-clay text-forest"
+                ? "bg-white text-forest shadow-card"
+                : "text-forest/70"
             )}
           >
             {formatDrawDate(group.drawDate)}
