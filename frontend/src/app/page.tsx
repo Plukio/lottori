@@ -89,7 +89,7 @@ export default function Home() {
       <header className="flex flex-col gap-4">
         <div className="flex items-center justify-between">
           <div>
-            <p className="text-sm uppercase tracking-[0.2em] text-forest/70">
+            <p className="text-sm uppercase tracking-[0.2em] text-forest/70 font-thai">
               รางวัลปรอบใจ คนไม่ถูกหวย
             </p>
             <h1 className="text-2xl font-semibold">Lotteri</h1>

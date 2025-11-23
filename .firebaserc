@@ -1,6 +1,6 @@
 {
   "projects": {
-    "default": "lottori-dev"
+    "default": "lotteri-7a2c2"
   },
   "targets": {
     "lotteri-7a2c2": {
@@ -12,3 +12,4 @@
     }
   },
   "etags": {}
+}

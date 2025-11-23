@@ -8,14 +8,20 @@
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
+  --font-sans: var(--font-geist-sans), var(--font-noto-thai),
+    system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: var(--font-geist-sans), system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+  font-family: var(--font-geist-sans), var(--font-noto-thai), system-ui,
+    -apple-system, BlinkMacSystemFont, sans-serif;
   min-height: 100vh;
+}
+
+.font-thai {
+  font-family: var(--font-noto-thai), var(--font-geist-sans), system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
 }
 
 .glass-card {
@@ -37,10 +43,12 @@ body {
     transform: scaleX(0.4);
     opacity: 0.8;
   }
+
   50% {
     transform: scaleX(1);
     opacity: 1;
   }
+
   100% {
     transform: scaleX(0.4);
     opacity: 0.8;
