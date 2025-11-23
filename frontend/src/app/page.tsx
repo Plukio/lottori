@@ -278,20 +278,20 @@ function TicketsSection({
           สแกนเพิ่ม
         </button>
       </div>
-      <div className="flex gap-2 overflow-x-auto rounded-full bg-clay/50 p-2 no-scrollbar">
+      <div className="flex gap-2 overflow-x-auto rounded-full bg-white/60 px-2 py-1 no-scrollbar">
         {groups.map((group) => (
           <button
             key={group.drawDate}
             type="button"
             onClick={() => setActiveDraw(group.drawDate)}
             className={clsx(
-              "rounded-full px-4 py-2 text-sm font-semibold transition shadow-sm",
+              "rounded-full px-3 py-1.5 text-xs font-semibold transition shadow-sm",
               group.drawDate === safeActiveDraw
                 ? "bg-white text-forest shadow-card"
                 : "text-forest/70"
             )}
           >
-            {formatDrawDate(group.drawDate)}
+            {formatDrawTabLabel(group.drawDate)}
           </button>
         ))}
       </div>
@@ -363,7 +363,7 @@ function RewardsSection({
       {rewards.map((reward) => (
         <article
           key={reward.id}
-          className="rounded-4xl border border-forest/10 bg-white p-5 shadow-card"
+          className="rounded-3xl border border-forest/10 bg-white px-4 py-4 shadow-card/50"
         >
           <p className="text-sm text-forest/60">{reward.provider}</p>
           <h3 className="text-2xl font-semibold">
@@ -453,15 +453,15 @@ function FloatingNav({
   onChange: (view: "tickets" | "rewards") => void;
 }) {
   return (
-    <nav className="fixed bottom-5 left-1/2 z-30 flex w-[90vw] max-w-md -translate-x-1/2 items-center gap-2 rounded-full border border-forest/10 bg-forest text-white px-4 py-2 shadow-card">
+    <nav className="fixed bottom-5 left-1/2 z-30 flex w-[90vw] max-w-md -translate-x-1/2 items-center gap-2 rounded-full border border-white/50 bg-white/80 px-4 py-2 text-forest shadow-card backdrop-blur">
       <button
         type="button"
         onClick={() => onChange("tickets")}
         className={clsx(
           "flex flex-1 items-center justify-center gap-2 rounded-full px-3 py-2 text-xs font-semibold transition",
           active === "tickets"
-            ? "bg-shamrock text-white"
-            : "text-white/70 hover:bg-white/10"
+            ? "bg-shamrock text-white shadow-md"
+            : "text-forest/70 hover:bg-white/60"
         )}
       >
         <TicketIcon className="h-4 w-4" />
@@ -473,8 +473,8 @@ function FloatingNav({
         className={clsx(
           "flex flex-1 items-center justify-center gap-2 rounded-full px-3 py-2 text-xs font-semibold transition",
           active === "rewards"
-            ? "bg-shamrock text-white"
-            : "text-white/70 hover:bg-white/10"
+            ? "bg-shamrock text-white shadow-md"
+            : "text-forest/70 hover:bg-white/60"
         )}
       >
         <Gift className="h-4 w-4" />
@@ -632,11 +632,21 @@ function ScanResultModal({
 function formatDrawDate(drawDate: string) {
   const date = new Date(drawDate);
   if (!Number.isNaN(date.valueOf())) {
-    return date.toLocaleDateString("en-GB", {
-      day: "2-digit",
+    return new Intl.DateTimeFormat("en-GB", {
+      day: "numeric",
       month: "long",
-      year: "numeric",
-    });
+    }).format(date);
+  }
+  return drawDate;
+}
+
+function formatDrawTabLabel(drawDate: string) {
+  const date = new Date(drawDate);
+  if (!Number.isNaN(date.getTime())) {
+    return new Intl.DateTimeFormat("en-GB", {
+      day: "numeric",
+      month: "short",
+    }).format(date);
   }
   return drawDate;
 }
