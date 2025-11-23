@@ -464,8 +464,15 @@ function FloatingNav({
             : "text-forest/70 hover:bg-white/60"
         )}
       >
-        <TicketIcon className="h-4 w-4" />
-        My Tickets
+        <TicketIcon
+          className={clsx(
+            "h-5 w-5",
+            active === "tickets" ? "text-white" : "text-forest/60"
+          )}
+        />
+        <span className={clsx(active === "tickets" ? "font-semibold" : "")}>
+          My Tickets
+        </span>
       </button>
       <button
         type="button"
@@ -477,8 +484,15 @@ function FloatingNav({
             : "text-forest/70 hover:bg-white/60"
         )}
       >
-        <Gift className="h-4 w-4" />
-        Rewards
+        <Gift
+          className={clsx(
+            "h-5 w-5",
+            active === "rewards" ? "text-white" : "text-forest/60"
+          )}
+        />
+        <span className={clsx(active === "rewards" ? "font-semibold" : "")}>
+          Rewards
+        </span>
       </button>
     </nav>
   );
