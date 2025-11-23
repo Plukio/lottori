@@ -91,7 +91,7 @@ export default function Home() {
       idToken
     )
       .then(() => {
-        setToast("Ticket synced to cloud");
+        setToast("Lottery synced to cloud");
         setScanResult(null);
         setTimeout(() => setToast(null), 2000);
       })
@@ -248,14 +248,14 @@ function TicketsSection({
   if (!groups.length) {
     return (
       <section className="rounded-4xl bg-white p-6 text-center shadow-card">
-        <p className="text-lg font-semibold">ยังไม่มีลอตเตอรี่ในระบบ</p>
-        <p className="text-sm text-forest/60">
+        <p className="text-lg font-semibold font-thai">ยังไม่มีลอตเตอรี่ในระบบ</p>
+        <p className="text-sm text-forest/60 font-thai">
           สแกนตั๋วใบแรกของคุณเพื่อดูผลและรับรางวัลปลอบใจ
         </p>
         <button
           type="button"
           onClick={onScan}
-          className="mt-4 inline-flex items-center justify-center rounded-full bg-shamrock px-5 py-2 text-sm font-semibold text-white hover:bg-shamrockDark"
+          className="mt-4 inline-flex items-center justify-center rounded-full bg-shamrock px-5 py-2 text-sm font-semibold text-white hover:bg-shamrockDark font-thai"
         >
           สแกนลอตเตอรี่
         </button>
@@ -269,11 +269,11 @@ function TicketsSection({
   return (
     <section className="space-y-4 rounded-4xl bg-white p-5 shadow-card">
       <div className="flex items-center justify-between">
-        <h2 className="text-xl font-semibold">My Tickets</h2>
+        <h2 className="text-xl font-semibold">My Lotteries</h2>
         <button
           type="button"
           onClick={onScan}
-          className="rounded-full border border-forest/15 px-4 py-2 text-sm font-semibold text-forest hover:border-forest/30"
+          className="rounded-full border border-forest/15 px-4 py-2 text-sm font-semibold text-forest hover:border-forest/30 font-thai"
         >
           สแกนเพิ่ม
         </button>
@@ -304,12 +304,12 @@ function TicketsSection({
             </h3>
           </div>
           <span className="rounded-full bg-mint px-3 py-1 text-xs font-semibold text-shamrock">
-            {activeGroup.tickets.length} tickets
+            {activeGroup.tickets.length} lotteries
           </span>
         </div>
         {activeGroup.headline && (
           <div className="rounded-2xl bg-mint px-4 py-3 text-sm font-semibold text-shamrock">
-            {activeGroup.headline} All your tickets this draw were non-winners.
+            {activeGroup.headline} All your lotteries this draw were non-winners.
           </div>
         )}
         {activeGroup.tickets.map((ticket) => (
@@ -319,7 +319,7 @@ function TicketsSection({
           >
             <div>
               <p className="text-xs uppercase tracking-[0.3em] text-forest/60">
-                Ticket number
+                Lottery number
               </p>
               <p className="text-base font-semibold">{ticket.numbers}</p>
               <p className="text-xs uppercase tracking-[0.3em] text-forest/60">
@@ -464,7 +464,7 @@ function FloatingNav({
       >
         <TicketIcon className="h-5 w-5" />
         <span className={clsx(active === "tickets" ? "font-bold" : "font-semibold")}>
-          My Tickets
+          My Lotteries
         </span>
       </button>
       <button
@@ -600,7 +600,7 @@ function ScanResultModal({
         </div>
         <div className="grid grid-cols-2 gap-3 text-left">
           <div className="rounded-2xl border border-forest/10 bg-white px-3 py-2">
-            <p className="text-xs text-forest/60">Ticket numbers</p>
+          <p className="text-xs text-forest/60">Lottery numbers</p>
             <p className="text-lg font-semibold">{data.numbers}</p>
           </div>
           <div className="rounded-2xl border border-forest/10 bg-white px-3 py-2">
