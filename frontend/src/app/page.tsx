@@ -287,10 +287,10 @@ function TicketsSection({
             type="button"
             onClick={() => setActiveDraw(group.drawDate)}
             className={clsx(
-              "rounded-full px-3 py-1.5 text-xs font-semibold transition shadow-sm",
+              "rounded-full border px-3 py-1.5 text-xs font-semibold transition",
               group.drawDate === safeActiveDraw
-                ? "bg-white text-forest shadow-card"
-                : "text-forest/70"
+                ? "border-forest/30 bg-white text-forest shadow-card font-bold scale-[1.05]"
+                : "border-transparent text-forest/60 hover:border-forest/10"
             )}
           >
             {formatDrawTabLabel(group.drawDate)}
@@ -516,13 +516,7 @@ function ScannerViewport({
         },
       },
       decoder: {
-        readers: [
-          "code_128_reader",
-          "code_39_reader",
-          "ean_reader",
-          "ean_8_reader",
-          "qr_reader",
-        ],
+        readers: ["qr_reader"],
       },
       locate: true,
     };
@@ -602,7 +596,7 @@ function ScanResultModal({
         </div>
         <div className="grid grid-cols-2 gap-3 text-left">
           <div className="rounded-2xl border border-forest/10 bg-white px-3 py-2">
-          <p className="text-xs text-forest/60">Lottery numbers</p>
+            <p className="text-xs text-forest/60">Lottery numbers</p>
             <p className="text-lg font-semibold">{data.numbers}</p>
           </div>
           <div className="rounded-2xl border border-forest/10 bg-white px-3 py-2">
